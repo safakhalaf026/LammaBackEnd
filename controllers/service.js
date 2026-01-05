@@ -11,6 +11,7 @@ router.post('/', async (req, res) => {
             return res.status(403).json({ err: 'Only service providers can create services' })
         }
 
+// --------- MUST ADD COORDINATES FROM FRONTEND IN THE FUTURE ------------ 
         // reference the logged in service provider 
         const serviceData = {
             ...req.body,
@@ -24,6 +25,16 @@ router.post('/', async (req, res) => {
     } catch (err) {
         console.error(err)
         res.status(500).json({ err: 'Failed to create service' })
+    }
+})
+
+router.get('/', async (req, res) => {
+    try {
+        const services = await Service.find()
+        res.status(200).json({services})
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ err: 'Failed to get services data' })
     }
 })
 
