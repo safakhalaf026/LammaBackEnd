@@ -5,31 +5,37 @@ const Review = require('../models/Review')
 
 router.post('/:serviceId', async (req,res)=>{
     try {
+        // retrieve service id and fetch it from database
         const {serviceId} = req.params
         const findService = await Service.findById(serviceId)
 
+        // error handling
         if(!findService){
             return res.status(404).json({ err: 'Service Not found' })
         }
 
+        // role validation
         const serviceOwner = String(findService.provider)
         if(serviceOwner === req.user._id){
             return res.status(403).json({ err: 'Service provider cant review their own service' })
         }
 
+        // refrence logged in customer and found service
         const reviewData = {
             ...req.body,
             customer: req.user._id,
             service: serviceId,
         }
 
+        // create record
         const review = await Review.create(reviewData)
 
-        const reviews = await Review.find({ service: serviceId }).select('rating')
-        const count = reviews.length
-        const sum = reviews.reduce((acc, r) => acc + r.rating, 0)
-        const average = count === 0 ? 0 : Math.round((sum / count) * 10) / 10
+        const reviews = await Review.find({ service: serviceId }).select('rating') // returns an array that only has the ratings of that service
+        const count = reviews.length // finds the count based on the arrray length
+        const sum = reviews.reduce((acc, r) => acc + r.rating, 0) // reduce to loop through ratings array and find sum 
+        const average = count === 0 ? 0 : Math.round((sum / count) * 10) / 10 // finally get average to one decimal point (checks if service has no ratings, then just return 0)
 
+        // becuase fields are embedded, update and save from the service model 
         findService.ratingStats = { average, count }
         await findService.save()
 
