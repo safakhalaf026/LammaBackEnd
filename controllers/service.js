@@ -53,4 +53,20 @@ router.get('/:serviceId', async (req, res) => {
     }
 })
 
+router.put('/:serviceId', async (req, res) => {
+    try {
+        const {serviceId} = req.params
+        const service = await Service.findByIdAndUpdate(serviceId, req.body, {new:true,})
+        if (!service){
+            return res.status(404).json({ err: 'Service Not found' })
+        }else{
+            res.status(200).json({service})
+        }
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ err: 'Failed to get service data' })
+    }
+})
+
+
 module.exports = router
