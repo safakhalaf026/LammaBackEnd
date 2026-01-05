@@ -1,7 +1,6 @@
 const express = require('express')
 const jwt = require('jsonwebtoken')
 const router = express.Router()
-const User = require('../models/User')
 const Service = require('../models/Service')
 
 router.post('/', async (req, res) => {
@@ -21,65 +20,83 @@ router.post('/', async (req, res) => {
         // create record
         const service = await Service.create(serviceData)
 
-        res.status(201).json({service})
+        return res.status(201).json({service})
     } catch (err) {
         console.error(err)
-        res.status(500).json({ err: 'Failed to create service' })
+        return res.status(500).json({ err: 'Failed to create service' })
     }
 })
 
 router.get('/', async (req, res) => {
     try {
-        const services = await Service.find()
-        res.status(200).json({services})
+        const services = await Service.find() // retrieve all services
+        return res.status(200).json({services})
     } catch (err) {
         console.error(err)
-        res.status(500).json({ err: 'Failed to get services data' })
+        return res.status(500).json({ err: 'Failed to get services data' })
     }
 })
 
 router.get('/:serviceId', async (req, res) => {
     try {
-        const {serviceId} = req.params
+        const {serviceId} = req.params 
         const service = await Service.findById(serviceId)
+
+        // error handling
         if (!service){
             return res.status(404).json({ err: 'Service Not found' })
         }else{
-            res.status(200).json({service})
+            return res.status(200).json({service})
         }
     } catch (err) {
         console.error(err)
-        res.status(500).json({ err: 'Failed to get service data' })
+        return res.status(500).json({ err: 'Failed to get service data' })
     }
 })
 
 router.put('/:serviceId', async (req, res) => {
     try {
         const {serviceId} = req.params
-        const service = await Service.findByIdAndUpdate(serviceId, req.body, {new:true,})
-        if (!service){
+        const findService = await Service.findById(serviceId)
+
+        // error handling
+        if (!findService){
             return res.status(404).json({ err: 'Service Not found' })
-        }else{
-            res.status(200).json({service})
         }
+
+        const serviceOwner = String(findService.provider) // convert from objectId to string
+
+        // ownership validation
+        if(req.user._id !== serviceOwner){
+            return res.status(403).json({ err: 'Only service creator can edit services' })
+        }
+        const service = await Service.findByIdAndUpdate(serviceId, req.body, {new:true,})
+        return res.status(200).json({service})
     } catch (err) {
         console.error(err)
-        res.status(500).json({ err: 'Failed to get service data' })
+        return res.status(500).json({ err: 'Failed to get service data' })
     }
 })
 
 router.delete('/:serviceId', async (req, res) => {
     try {
         const {serviceId} = req.params
-        const service = await Service.findByIdAndDelete(serviceId)
-        if (!service){
+        const findService = await Service.findById(serviceId)
+
+        if (!findService){
             return res.status(404).json({ err: 'Service Not found' })
-        }else{
-            res.status(200).json({service})
         }
+
+        const serviceOwner = String(findService.provider)
+        
+        if(req.user._id !== serviceOwner){
+            return res.status(403).json({ err: 'Only service creator can delete services' })
+        }
+        const service = await Service.findByIdAndDelete(serviceId)
+        return res.status(200).json({service})
     } catch (err) {
         console.error(err)
-        res.status(500).json({ err: 'Failed to get service data' })
+        return res.status(500).json({ err: 'Failed to get service data' })
     }
 })
 
