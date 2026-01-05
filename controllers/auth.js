@@ -25,6 +25,7 @@ router.post('/sign-up', async (req,res)=>{
         // construct payload 
         const payload = {
             username: user.username,
+            role: user.role,
             _id: user._id
         }
 
@@ -64,6 +65,7 @@ router.post('/sign-in', async (req, res) => {
     // Create payload
     const payload = { 
         username: userInDatabase.username,
+        role: userInDatabase.role,
         _id: userInDatabase._id 
     }
     // create token and attach payload to it
