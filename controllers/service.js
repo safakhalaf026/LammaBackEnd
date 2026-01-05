@@ -1,5 +1,4 @@
 const express = require('express')
-const jwt = require('jsonwebtoken')
 const router = express.Router()
 const Service = require('../models/Service')
 
@@ -41,7 +40,7 @@ router.get('/:serviceId', async (req, res) => {
     try {
         const {serviceId} = req.params 
         const service = await Service.findById(serviceId)
-
+        
         // error handling
         if (!service){
             return res.status(404).json({ err: 'Service Not found' })
@@ -88,7 +87,7 @@ router.delete('/:serviceId', async (req, res) => {
         }
 
         const serviceOwner = String(findService.provider)
-        
+
         if(req.user._id !== serviceOwner){
             return res.status(403).json({ err: 'Only service creator can delete services' })
         }
