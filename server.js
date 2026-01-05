@@ -8,6 +8,7 @@ const logger = require('morgan');
 
 // Controllers
 const authCtrl = require('./controllers/auth') 
+const serviceCtrl = require('./controllers/service')
 
 // Middleware 
 const isSignedIn = require('./middleware/isSignedIn')
@@ -25,9 +26,10 @@ app.use(logger('dev'));
 // ---------- PUBLIC ROUTES ----------
 app.use('/auth', authCtrl) 
 
-
 // ---------- PROTECTED ROUTES ----------
 app.use(isSignedIn)
+app.use('/service', serviceCtrl)
+
 
 app.get('/test', (req,res)=>{
   console.log(req.user)
