@@ -1,84 +1,50 @@
-<<<<<<< HEAD
-const mongoose = require('mongoose');
-
-const reviewSchema = new mongoose.Schema({
-  service: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true },
-  rating: { type: Number, min: 1, max: 5, required: true },
-  comment: { type: String },
-  customer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
-}, { timestamps: true });
-
-module.exports = mongoose.model('Review', reviewSchema);
-=======
 const express = require('express')
 const router = express.Router()
-const Service = require('../models/Service')
 const Review = require('../models/Review')
+const Service = require('../models/Service')
 
-router.post('/:serviceId', async (req,res)=>{
-    try {
-        // retrieve service id and fetch it from database
-        const {serviceId} = req.params
-        const findService = await Service.findById(serviceId)
+// GET all reviews for a specific service
+router.get('/:serviceId', async (req, res) => {
+  try {
+    const reviews = await Review.find({ service: req.params.serviceId })
+      .populate('customer', 'displayName')
 
-        // error handling
-        if(!findService){
-            return res.status(404).json({ err: 'Service Not found' })
-        }
-
-        // role validation
-        const serviceOwner = String(findService.provider)
-        if(serviceOwner === req.user._id){
-            return res.status(403).json({ err: 'Service provider cant review their own service' })
-        }
-
-        // refrence logged in customer and found service
-        const reviewData = {
-            ...req.body,
-            customer: req.user._id,
-            service: serviceId,
-        }
-
-        // create record
-        const review = await Review.create(reviewData)
-
-        const allRatings = await Review.find({ service: serviceId }).select('rating') // returns an array that only has the ratings of that service
-        const count = allRatings.length // finds the count based on the arrray length
-        const sum = allRatings.reduce((acc, r) => acc + r.rating, 0) // reduce to loop through ratings array and find sum 
-        const average = count === 0 ? 0 : Math.round((sum / count) * 10) / 10 // finally get average to one decimal point (checks if service has no ratings, then just return 0)
-
-        // becuase fields are embedded, update and save from the service model 
-        findService.ratingStats = { average, count }
-        await findService.save()
-
-        return res.status(201).json({review, ratingStats: findService.ratingStats})
-    } catch (err) {
-        console.log(err)
-        return res.status(500).json({ err: 'Failed to submit review' })
-    }
+    return res.status(200).json({ reviews })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({ message: 'Server error' })
+  }
 })
 
-router.get('/:serviceId', async (req,res)=>{
-    try {
-        // retrieve service id and fetch it from database
-        const {serviceId} = req.params
-        const findService = await Service.findById(serviceId)
-
-        // error handling
-        if(!findService){
-            return res.status(404).json({ err: 'Service Not found' })
-        }
-
-        // retrieve all reviews where the id stored in the DB and the id from the browser is the same
-        // .populate takes 2 arguments, the field we want to refrence and the data we need to display
-        // .sort shows the most recent added review
-        const allReviews= await Review.find({service: serviceId}).populate('customer', 'displayName username avatar role').sort({createdAt: -1})
-
-        return res.status(200).json({allReviews})
-    } catch (err) {
-        console.log(err)
-        return res.status(500).json({ err: 'Failed to retrieve reviews' })  
+// POST a new review for a service
+router.post('/', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorized' })
     }
+
+    const { service, rating, comment } = req.body
+
+    // Check if service exists
+    const findService = await Service.findById(service)
+    if (!findService) {
+      return res.status(404).json({ message: 'Service not found' })
+    }
+
+    // Create review
+    const newReview = new Review({
+      service,
+      rating,
+      comment,
+      customer: req.user._id
+    })
+
+    await newReview.save()
+    return res.status(201).json({ review: newReview })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({ message: 'Failed to create review' })
+  }
 })
+
 module.exports = router
->>>>>>> main

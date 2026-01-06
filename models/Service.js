@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-const mongoose = require('mongoose');
-
-const serviceSchema = new mongoose.Schema({
-  serviceName: { type: String, required: true },
-  description: { type: String }
-}, { timestamps: true });
-
-module.exports = mongoose.model('Service', serviceSchema);
-=======
 const mongoose = require('mongoose')
 
 const serviceSchema = new mongoose.Schema({
@@ -76,4 +66,3 @@ const Service = mongoose.model('Service', serviceSchema)
 // export the model
 module.exports = Service
 
->>>>>>> main
