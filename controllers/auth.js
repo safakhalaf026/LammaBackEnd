@@ -2,7 +2,7 @@ const express = require('express')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const router = express.Router()
-const User = require('../models/user')
+const User = require('../models/User')
 
 router.post('/sign-up', async (req,res)=>{
     try {
@@ -25,6 +25,7 @@ router.post('/sign-up', async (req,res)=>{
         // construct payload 
         const payload = {
             username: user.username,
+            role: user.role,
             _id: user._id
         }
 
@@ -64,6 +65,7 @@ router.post('/sign-in', async (req, res) => {
     // Create payload
     const payload = { 
         username: userInDatabase.username,
+        role: userInDatabase.role,
         _id: userInDatabase._id 
     }
     // create token and attach payload to it

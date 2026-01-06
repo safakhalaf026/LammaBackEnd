@@ -11,9 +11,15 @@ const logger = require('morgan');
 const isSignedIn = require('./middleware/isSignedIn');
 
 // Controllers
+<<<<<<< HEAD
 const authCtrl = require('./controllers/auth');       // authentication
 const serviceCtrl = require('./controllers/service'); // services
 const reviewCtrl = require('./controllers/review');   // reviews
+=======
+const authCtrl = require('./controllers/auth') 
+const serviceCtrl = require('./controllers/service')
+const reviewCtrl = require('./controllers/review')
+>>>>>>> main
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI);
@@ -27,10 +33,20 @@ app.use(express.json());
 app.use(logger('dev'));
 
 // ---------- PUBLIC ROUTES ----------
+<<<<<<< HEAD
 app.use('/auth', authCtrl); // sign-in / sign-up
 
 // ---------- PROTECTED ROUTES ----------
 app.use(isSignedIn);        // everything after this requires a valid JWT
+=======
+app.use('/auth', authCtrl) 
+
+// ---------- PROTECTED ROUTES ----------
+app.use(isSignedIn)
+app.use('/service', serviceCtrl)
+app.use('/review', reviewCtrl)
+
+>>>>>>> main
 
 // Register controllers (same style as instructor’s pets project)
 serviceCtrl(app);           // GET /service/:id
