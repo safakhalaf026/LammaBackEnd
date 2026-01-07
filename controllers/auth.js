@@ -66,6 +66,7 @@ router.post('/sign-in', async (req, res) => {
     // Create payload
     const payload = { 
         username: userInDatabase.username,
+        displayName: userInDatabase.displayName,
         role: userInDatabase.role,
         _id: userInDatabase._id 
     }
