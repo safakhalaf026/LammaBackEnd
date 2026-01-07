@@ -28,7 +28,7 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const services = await Service.find() // retrieve all services
+      const services = await Service.find().populate('provider');// retrieve all services
         return res.status(200).json({services})
     } catch (err) {
         console.error(err)
@@ -39,8 +39,7 @@ router.get('/', async (req, res) => {
 router.get('/:serviceId', async (req, res) => {
     try {
         const {serviceId} = req.params 
-        const service = await Service.findById(serviceId)
-        
+        service = await Service.findById(serviceId).populate('provider');        
         // error handling
         if (!service){
             return res.status(404).json({ err: 'Service Not found' })
