@@ -25,6 +25,7 @@ router.post('/sign-up', async (req,res)=>{
         // construct payload 
         const payload = {
             username: user.username,
+            displayName: user.displayName,
             role: user.role,
             _id: user._id
         }
@@ -65,6 +66,7 @@ router.post('/sign-in', async (req, res) => {
     // Create payload
     const payload = { 
         username: userInDatabase.username,
+        displayName: userInDatabase.displayName,
         role: userInDatabase.role,
         _id: userInDatabase._id 
     }
