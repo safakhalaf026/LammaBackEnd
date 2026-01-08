@@ -36,7 +36,7 @@ const userSchema = mongoose.Schema({
 
   avatar: {
     type: String,
-    required: true,
+    default:"https://postimg.cc/gallery/66Ysp06"
   },
   
 },{timestamps: true})
