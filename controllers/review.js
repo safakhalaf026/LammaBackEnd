@@ -7,7 +7,7 @@ const Service = require('../models/Service')
 router.get('/:serviceId', async (req, res) => {
   try {
     const reviews = await Review.find({ service: req.params.serviceId })
-      .populate('customer', 'displayName')
+      .populate('customer', 'displayName') // include displayName of the user
 
     return res.status(200).json({ reviews })
   } catch (err) {
@@ -40,7 +40,23 @@ router.post('/', async (req, res) => {
     })
 
     await newReview.save()
-    return res.status(201).json({ review: newReview })
+
+    // Update ratingStats for the service
+    const allReviews = await Review.find({ service })
+    const total = allReviews.length
+    const average = allReviews.reduce((sum, r) => sum + r.rating, 0) / total
+
+    await Service.findByIdAndUpdate(service, {
+      ratingStats: {
+        average,
+        count: total
+      }
+    })
+
+    // Populate customer field so frontend gets displayName immediately
+    const populatedReview = await newReview.populate('customer', 'displayName')
+
+    return res.status(201).json({ review: populatedReview })
   } catch (err) {
     console.error(err)
     return res.status(500).json({ message: 'Failed to create review' })
