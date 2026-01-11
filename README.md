@@ -5,6 +5,14 @@ Lamma is a location-based community services platform built using RESTful conven
 ## 🧩 About the Project
 Lamma connects neighbors by allowing service providers to list services and customers to discover them using a live, interactive map. Services are displayed as map markers based on geographic coordinates, making it easy to explore what’s available nearby. Users can view service details, leave reviews, and track ratings, creating a trusted and community-driven platform.
 
+### Dashboard Page
+![dashboard](./images/Dashboard.png)
+
+### Sign up Page
+![signupForm](./images/SignUp.png)
+
+### Service Details Page
+![serviceDetails](./images/ServiceDetails.png)
 
 
 ## ✨ Features

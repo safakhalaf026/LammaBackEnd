@@ -3,21 +3,30 @@ const router = express.Router()
 const Service = require('../models/Service')
 const Review = require('../models/Review')
 
-router.post('/:serviceId', async (req,res)=>{
+router.post('/:serviceId', async (req, res) => {
     try {
         // retrieve service id and fetch it from database
-        const {serviceId} = req.params
+        const { serviceId } = req.params
         const findService = await Service.findById(serviceId)
 
         // error handling
-        if(!findService){
+        if (!findService) {
             return res.status(404).json({ err: 'Service Not found' })
         }
 
         // role validation
         const serviceOwner = String(findService.provider)
-        if(serviceOwner === req.user._id){
+        if (serviceOwner === req.user._id) {
             return res.status(403).json({ err: 'Service provider cant review their own service' })
+        }
+
+        const existing = await Review.findOne({
+            service: serviceId,
+            customer: req.user._id,
+        })
+
+        if (existing) {
+            return res.status(409).json({ err: 'You have already submitted a review for this service' })
         }
 
         // refrence logged in customer and found service
@@ -39,33 +48,33 @@ router.post('/:serviceId', async (req,res)=>{
         findService.ratingStats = { average, count }
         await findService.save()
 
-        return res.status(201).json({review, ratingStats: findService.ratingStats})
+        return res.status(201).json({ review, ratingStats: findService.ratingStats })
     } catch (err) {
         console.log(err)
         return res.status(500).json({ err: 'Failed to submit review' })
     }
 })
 
-router.get('/:serviceId', async (req,res)=>{
+router.get('/:serviceId', async (req, res) => {
     try {
         // retrieve service id and fetch it from database
-        const {serviceId} = req.params
+        const { serviceId } = req.params
         const findService = await Service.findById(serviceId)
 
         // error handling
-        if(!findService){
+        if (!findService) {
             return res.status(404).json({ err: 'Service Not found' })
         }
 
         // retrieve all reviews where the id stored in the DB and the id from the browser is the same
         // .populate takes 2 arguments, the field we want to refrence and the data we need to display
         // .sort shows the most recent added review
-        const allReviews= await Review.find({service: serviceId}).populate('customer', 'displayName username avatar role').sort({createdAt: -1})
+        const allReviews = await Review.find({ service: serviceId }).populate('customer', 'displayName username avatar role').sort({ createdAt: -1 })
 
-        return res.status(200).json({allReviews})
+        return res.status(200).json({ allReviews })
     } catch (err) {
         console.log(err)
-        return res.status(500).json({ err: 'Failed to retrieve reviews' })  
+        return res.status(500).json({ err: 'Failed to retrieve reviews' })
     }
 })
 module.exports = router
